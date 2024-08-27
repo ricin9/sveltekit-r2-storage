@@ -1,7 +1,7 @@
 import { env as privateEnv } from "$env/dynamic/private";
 import { env } from "$env/dynamic/public";
 import { S3 } from "$lib/server/S3.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, UploadPartCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { json } from "@sveltejs/kit";
 import { v4 as uuid } from "uuid";
