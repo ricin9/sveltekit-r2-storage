@@ -4,7 +4,7 @@ import { S3 } from "$lib/server/S3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { json } from "@sveltejs/kit";
-import { randomUUID } from "crypto";
+import { v4 as uuid } from "uuid";
 
 export async function POST({ cookies, request }) {
   const { name: filename, size, type } = await request.json<any>();
@@ -22,7 +22,7 @@ export async function POST({ cookies, request }) {
   signableHeaders.add("content-length");
 
   const fileExt = (filename as string).split(".").slice(1).join(".");
-  const randomFileName = `${randomUUID()}.${fileExt}`;
+  const randomFileName = `${uuid()}.${fileExt}`;
 
   const uploadUrl = await getSignedUrl(
     S3,
