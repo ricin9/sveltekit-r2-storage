@@ -60,21 +60,55 @@
   }
 </script>
 
-{#if errorMessage}
-  <p style="color: red;">{errorMessage}</p>
-{/if}
-{#if successMessage}
-  <p style="color: green;">{successMessage}</p>
-{/if}
+<body>
+  <p>
+    Simple file upload using S3 compatible object storage (cloudflare r2 in this
+    case) and sveltekit, files are uploaded using presigned url, and maximum
+    size is verified using a signed header Content-Length, file names and urls
+    are synchronized in local storage, files are auto-deleted after 48 hours
+  </p>
 
-<p>
-  upload a file, max size : {(PUBLIC_MAX_FILE_SIZE / 1024 ** 2).toFixed(2)}MB
-</p>
-<input type="file" on:change={handleFileUpload} />
+  <p id="warning">DO NOT UPLOAD PRIVATE AND SENSITIVE FILES</p>
 
-<h4>uploaded files</h4>
-<ul>
-  {#each $uploadedFiles as file}
-    <li><a href={file.url}>{file.name}</a></li>
-  {/each}
-</ul>
+  {#if errorMessage}
+    <p style="color: red;">{errorMessage}</p>
+  {/if}
+  {#if successMessage}
+    <p style="color: green;">{successMessage}</p>
+  {/if}
+
+  <p>
+    upload a file, max size : {(PUBLIC_MAX_FILE_SIZE / 1024 ** 2).toFixed(2)}MB
+  </p>
+  <input type="file" on:change={handleFileUpload} />
+
+  <h4>uploaded files</h4>
+  <ul>
+    {#each $uploadedFiles as file}
+      <li><a href={file.url}>{file.name}</a></li>
+    {/each}
+  </ul>
+
+  <a
+    id="github"
+    href="https://github.com/ricin9/sveltekit-r2-storage"
+    target="_blank">source code</a
+  >
+</body>
+
+<style>
+  body {
+    max-width: 80%;
+    margin-left: 8rem;
+    margin-right: 8rem;
+  }
+  #github {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+  }
+
+  #warning {
+    text-decoration: underline;
+  }
+</style>
