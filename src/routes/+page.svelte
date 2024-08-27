@@ -2,11 +2,13 @@
   // @ts-nocheck
 
   import { env } from "$env/dynamic/public";
+  import Spinner from "$lib/client/components/Spinner.svelte";
 
-  import { files as uploadedFiles } from "$lib/client/uploadedFilesStore";
+  import { files as uploadedFiles } from "$lib/client/stores/uploadedFilesStore";
 
   let errorMessage = "";
   let successMessage = "";
+  let inProgress = false;
 
   async function handleFileUpload(event) {
     errorMessage = "";
@@ -18,7 +20,7 @@
       return;
     }
 
-    console.log(file);
+    inProgress = true;
 
     // get presigned url
     const presignedResponse = await fetch("/api/get-presigned-upload-url/", {
@@ -33,6 +35,7 @@
     const { uploadUrl, randomFileName, error } = await presignedResponse.json();
     if (!presignedResponse.ok) {
       errorMessage = error;
+      inProgress = false;
       return;
     }
 
@@ -46,6 +49,7 @@
       });
     } catch (error) {
       errorMessage = "Failed to upload file";
+      inProgress = false;
       return;
     }
 
@@ -54,6 +58,7 @@
       url: env.PUBLIC_R2_STORAGE_PUBLIC_URL + randomFileName,
     });
     $uploadedFiles = $uploadedFiles; // svelte thing, svelte only reacts with assignment "=" operator is used
+    inProgress = false;
   }
 </script>
 
@@ -80,6 +85,9 @@
     )}MB
   </p>
   <input type="file" on:change={handleFileUpload} />
+  {#if inProgress}
+    uploading ....<Spinner />
+  {/if}
 
   <h4>uploaded files</h4>
   <ul>
