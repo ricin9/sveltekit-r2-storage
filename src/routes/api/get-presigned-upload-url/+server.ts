@@ -1,5 +1,5 @@
-import { R2_BUCKET_NAME } from "$env/static/private";
-import { PUBLIC_MAX_FILE_SIZE } from "$env/static/public";
+import { env as privateEnv } from "$env/dynamic/private";
+import { env } from "$env/dynamic/public";
 import { S3 } from "$lib/server/S3.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -13,7 +13,7 @@ export async function POST({ cookies, request }) {
     return json({ error: "Invalid request" }, { status: 400 });
   }
 
-  if (size > parseInt(PUBLIC_MAX_FILE_SIZE)) {
+  if (size > parseInt(env.PUBLIC_MAX_FILE_SIZE)) {
     return json({ error: "File too large" }, { status: 400 });
   }
 
@@ -27,7 +27,7 @@ export async function POST({ cookies, request }) {
   const uploadUrl = await getSignedUrl(
     S3,
     new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: privateEnv.R2_BUCKET_NAME,
       Key: randomFileName,
       ContentLength: size, // 1kb for testing
       ContentType: type,

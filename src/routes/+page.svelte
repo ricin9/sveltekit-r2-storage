@@ -1,10 +1,7 @@
 <script>
   // @ts-nocheck
 
-  import {
-    PUBLIC_MAX_FILE_SIZE,
-    PUBLIC_R2_STORAGE_PUBLIC_URL,
-  } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
 
   import { files as uploadedFiles } from "$lib/client/uploadedFilesStore";
 
@@ -54,7 +51,7 @@
 
     $uploadedFiles.unshift({
       name: file.name,
-      url: PUBLIC_R2_STORAGE_PUBLIC_URL + randomFileName,
+      url: env.PUBLIC_R2_STORAGE_PUBLIC_URL + randomFileName,
     });
     $uploadedFiles = $uploadedFiles; // svelte thing, svelte only reacts with assignment "=" operator is used
   }
@@ -78,7 +75,9 @@
   {/if}
 
   <p>
-    upload a file, max size : {(PUBLIC_MAX_FILE_SIZE / 1024 ** 2).toFixed(2)}MB
+    upload a file, max size : {(env.PUBLIC_MAX_FILE_SIZE / 1024 ** 2).toFixed(
+      2
+    )}MB
   </p>
   <input type="file" on:change={handleFileUpload} />
 
