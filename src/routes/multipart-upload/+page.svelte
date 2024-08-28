@@ -37,6 +37,8 @@
       randomFileName,
       presignedParts,
       presignedCompleteMultipartUpload,
+      Bucket,
+      Key,
       error,
     } = await response.json();
 
@@ -53,27 +55,81 @@
       presignedCompleteMultipartUpload,
     });
 
-    const chunk = file.slice(0, 256);
+    const CHUNK_SIZE = 5 * 1024 * 1024;
 
-    // try {
-    //   await fetch(uploadUrl, {
-    //     method: "PUT",
-    //     body: file,
-    //     headers: {
-    //       "Content-Type": file.type,
-    //     },
-    //   });
-    // } catch (error) {
-    //   errorMessage = "Failed to upload file";
-    //   inProgress = false;
-    //   return;
-    // }
+    async function uploadPartHelper({ partNumber, url }, retry = 3) {
+      if (retry === 0) {
+        console.log(
+          `uploading chunk ${partNumber} has failed, and max retry threshold is reached`
+        );
+        throw new Error(`failed to upload chunk ${partNumber}`);
+      }
+
+      console.log(`uploading chunk ${partNumber}`);
+      const chunk =
+        partNumber === presignedParts.length
+          ? file.slice((partNumber - 1) * CHUNK_SIZE)
+          : file.slice((partNumber - 1) * CHUNK_SIZE, partNumber * CHUNK_SIZE);
+
+      const response = await fetch(url, { method: "PUT", body: chunk });
+
+      const etag = response.headers.get("Etag");
+
+      if (!response.ok || !etag) {
+        console.log(`uploading chunk ${partNumber} has failed, retrying ...`);
+        return await uploadPartHelper({ partNumber, url }, retry - 1);
+      }
+
+      return { PartNumber: partNumber, ETag: etag };
+    }
+
+    // upload file in parts
+    const uploadPartsPromises = [];
+    for (let i = 0; i < presignedParts.length; i++) {
+      uploadPartsPromises.push(
+        uploadPartHelper({
+          partNumber: presignedParts[i].part,
+          url: presignedParts[i].url,
+        })
+      );
+    }
+
+    let uploadedPartsResult = [];
+    try {
+      uploadedPartsResult = await Promise.all(uploadPartsPromises);
+      console.log({ uploadedPartsResult });
+    } catch (err) {
+      console.log("upload has failed", err);
+      return;
+    }
+
+    // complete multipart upload
+    const completionResponse = await fetch("/api/complete-multipart-upload", {
+      method: "POST",
+      body: JSON.stringify({
+        Bucket,
+        Key,
+        UploadId,
+        MultipartUpload: { Parts: uploadedPartsResult },
+      }),
+    });
+
+    if (!completionResponse.ok) {
+      errorMessage = "Failed to complete multipart upload";
+      inProgress = false;
+      return;
+    }
+
+    const completionResult = await completionResponse.json();
+    console.log({ completionResult });
 
     $uploadedFiles.unshift({
       name: file.name,
       url: env.PUBLIC_R2_STORAGE_PUBLIC_URL + randomFileName,
     });
-    $uploadedFiles = $uploadedFiles; // svelte thing, svelte only reacts with assignment "=" operator is used
+
+    $uploadedFiles = $uploadedFiles;
+
     inProgress = false;
   }
 </script>

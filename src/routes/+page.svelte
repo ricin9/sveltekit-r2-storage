@@ -40,13 +40,14 @@
     }
 
     try {
-      await fetch(uploadUrl, {
+      const response = await fetch(uploadUrl, {
         method: "PUT",
         body: file,
         headers: {
           "Content-Type": file.type,
         },
       });
+      console.log({ response });
     } catch (error) {
       errorMessage = "Failed to upload file";
       inProgress = false;

@@ -35,7 +35,6 @@ export async function POST({ request }) {
     new CreateMultipartUploadCommand({
       Bucket: privateEnv.R2_BUCKET_NAME,
       Key: randomFileName,
-      ContentType: type,
     })
   );
 
@@ -58,7 +57,6 @@ export async function POST({ request }) {
         Key: randomFileName,
         UploadId,
         PartNumber,
-        ContentLength: Math.min(PART_SIZE, size - i * PART_SIZE),
       })
     );
   }
@@ -88,6 +86,8 @@ export async function POST({ request }) {
 
   // now we send to client an array of presigned UploadPart urls and a presigned CompleteMultipartUpload url
   return json({
+    Bucket: privateEnv.R2_BUCKET_NAME,
+    Key: randomFileName,
     UploadId,
     randomFileName,
     presignedParts,
