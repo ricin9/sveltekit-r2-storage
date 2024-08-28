@@ -1,7 +1,17 @@
+<script>
+  import { page } from "$app/stores";
+</script>
+
 <nav>
   <ul>
-    <li><a href="/">normal upload</a></li>
-    <li><a href="/multipart-upload">multipart upload</a></li>
+    <li class={$page.url.pathname == "/" ? "active" : ""}>
+      <a href="/">normal upload</a>
+    </li>
+    <li
+      class={$page.url.pathname.startsWith("/multipart-upload") ? "active" : ""}
+    >
+      <a href="/multipart-upload">multipart upload</a>
+    </li>
   </ul>
 </nav>
 <slot />
@@ -26,5 +36,9 @@
   a {
     text-decoration: none;
     color: blue;
+  }
+
+  .active a {
+    text-decoration: underline;
   }
 </style>

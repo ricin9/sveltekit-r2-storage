@@ -73,6 +73,11 @@
 
   <p id="warning">DO NOT UPLOAD PRIVATE AND SENSITIVE FILES</p>
 
+  <p>
+    normal upload is good for general purpose uploads, including small to medium
+    files, it uses a single connection
+  </p>
+
   {#if errorMessage}
     <p style="color: red;">{errorMessage}</p>
   {/if}

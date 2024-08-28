@@ -144,6 +144,12 @@
 
   <p id="warning">DO NOT UPLOAD PRIVATE AND SENSITIVE FILES</p>
 
+  <p>
+    mutlipart upload is useful for big files as it splits them into small parts
+    (chunks) and every part is uploaded independantly using multiple concurrent
+    connections
+  </p>
+
   {#if errorMessage}
     <p style="color: red;">{errorMessage}</p>
   {/if}
